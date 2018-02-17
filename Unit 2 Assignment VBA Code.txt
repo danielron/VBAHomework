@@ -1,0 +1,163 @@
+Private Sub Stocks()
+
+Dim I As Long
+Dim cur_ticker As String
+Dim total_volume As Double
+Dim start_price As Double
+Dim close_price As Double
+Dim greatest_pct_inc As Double
+Dim greatest_pct_dec As Double
+Dim greatest_tot_vol As Double
+Dim year_change As Double
+Dim pct_change As Double
+Dim best_ticker_vol As String
+
+
+' Initialize column titles and formatting
+
+Cells(1, 9).Value = "Ticker"
+Cells(1, 10).Value = "Year Change"
+Range("J:J").NumberFormat = "$#,##0.00"
+Cells(1, 11).Value = "Percent Change"
+Range("K:K").NumberFormat = "0%"
+Cells(1, 12).Value = "Total Volume"
+Cells(1, 16).Value = "Ticker"
+Cells(1, 17).Value = "Value"
+
+
+' Initialize variables
+
+I = 2
+j = 2
+greatest_pct_inc = 0
+greatest_pct_dec = 0
+cur_greatest_tot_vol = 0
+
+
+' Loop through the rows
+    
+While Not IsEmpty(Cells(I, 1).Value)
+    
+    total_volume = 0
+    cur_ticker = Cells(I, 1).Value
+    
+    ' Stock open price at beginning of year
+    
+    start_price = Cells(I, 3).Value
+    
+    
+    ' Loop through the current ticker to accumulate total volume
+    
+    While Cells(I, 1).Value = cur_ticker
+        
+        'Total volume for each stock and ticker
+            
+        total_volume = total_volume + Cells(I, 7)
+        I = I + 1
+            
+        ' Record greatest total volume
+            
+        If greatest_tot_vol < total_volume Then
+        greatest_tot_vol = total_volume
+        best_ticker_vol = cur_ticker
+        End If
+                
+    Wend
+    
+    
+    ' Stock close price at end of year
+    
+    close_price = Cells(I - 1, 6).Value
+    
+    ' Yearly change in price
+    
+    If start_price > 0 Then
+    
+        year_change = close_price - start_price
+        
+        ' Yearly percent change in price
+        
+        pct_change = ((close_price - start_price) / start_price)
+        
+        ' Greatest percent increase in price and ticker
+        
+        If greatest_pct_inc < pct_change Then
+        
+            greatest_pct_inc = pct_change
+            best_ticker_pct_inc = cur_ticker
+            
+        End If
+        
+    End If
+    
+    
+    ' Greatest percent decrease in price and ticker
+    
+    If greatest_pct_dec > pct_change Then
+    
+        greatest_pct_dec = pct_change
+        best_ticker_pct_dec = cur_ticker
+        
+    End If
+    
+    ' Output results to cells
+    
+    Cells(j, 9).Value = cur_ticker
+    
+    Cells(j, 10).Value = year_change
+    
+    If year_change < 0 Then
+        Cells(j, 10).Interior.Color = vbRed
+    Else
+        Cells(j, 10).Interior.Color = vbGreen
+    End If
+    
+    Cells(j, 11).Value = pct_change
+    Cells(j, 12).Value = total_volume
+    Cells(2, 15).Value = "Greatest % increase"
+    Cells(2, 16).Value = best_ticker_pct_inc
+    Cells(2, 17).Value = greatest_pct_inc
+    Range("Q2:Q2").NumberFormat = "0.00%"
+    Cells(3, 15).Value = "Greatest % decrease"
+    Cells(3, 16).Value = best_ticker_pct_dec
+    Cells(3, 17).Value = greatest_pct_dec
+    Range("Q3:Q3").NumberFormat = "0.00%"
+    Cells(4, 15).Value = "Greatest total volume"
+    Cells(4, 16).Value = best_ticker_vol
+    Cells(4, 17).Value = greatest_tot_vol
+    
+    
+    j = j + 1
+    
+    Wend
+
+End Sub
+
+
+
+
+Sub WorksheetLoop()
+
+         Dim WS_Count As Integer
+         Dim z As Integer
+
+         ' Set WS_Count equal to the number of worksheets in the active workbook
+        
+         WS_Count = ActiveWorkbook.Worksheets.Count
+
+         ' Begin looping through the pages
+         
+         For z = 1 To WS_Count
+
+            ' This line used for debugging: MsgBox ActiveWorkbook.Worksheets(z).Name
+         
+            Application.Goto ActiveWorkbook.Sheets(z).Cells(1, 1)
+            
+            ' Call the Stocks sub
+            
+            Stocks
+
+
+         Next z
+
+      End Sub
